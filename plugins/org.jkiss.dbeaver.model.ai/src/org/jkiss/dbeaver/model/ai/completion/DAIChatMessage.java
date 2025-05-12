@@ -49,4 +49,9 @@ public record DAIChatMessage(
         this(role, content, LocalDateTime.now());
     }
 
+    @Override
+    public String toString() {
+        return "Message (" + role + "): " + content;
+    }
+
 }
