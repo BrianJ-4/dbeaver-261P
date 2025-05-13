@@ -18,8 +18,8 @@ package org.jkiss.dbeaver.model.ai;
 
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
-import org.jkiss.dbeaver.ext.generic.model.GenericSQLDialect;
 import org.jkiss.dbeaver.model.ai.format.IAIFormatter;
+import org.jkiss.dbeaver.model.impl.sql.BasicSQLDialect;
 import org.jkiss.dbeaver.model.sql.SQLDialect;
 
 import java.time.ZonedDateTime;
@@ -43,7 +43,7 @@ public class PromptBuilder {
 
     @NotNull
     public static PromptBuilder createForDialect(@Nullable SQLDialect dialect, @NotNull IAIFormatter formatter) {
-        return createForDialect0(dialect != null ? dialect : new GenericSQLDialect(), formatter);
+        return createForDialect0(dialect != null ? dialect : BasicSQLDialect.INSTANCE, formatter);
     }
 
     @NotNull
