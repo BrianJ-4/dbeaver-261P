@@ -14,26 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jkiss.dbeaver.ui.editors.sql.ai.internal;
+package org.jkiss.dbeaver.model.ai;
 
 import org.eclipse.core.runtime.Plugin;
+import org.jkiss.dbeaver.model.ai.internal.AIBaseFeatures;
 import org.jkiss.dbeaver.model.impl.preferences.BundlePreferenceStore;
 import org.jkiss.dbeaver.model.runtime.features.DBRFeatureRegistry;
 import org.osgi.framework.BundleContext;
 
-public class AIUIActivator extends Plugin {
+public class AIActivator extends Plugin {
+    
+    private static AIActivator instance;
+    
+    private BundlePreferenceStore preferences;
+
+    public AIActivator() {
+    }
 
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
-        DBRFeatureRegistry.getInstance().registerFeatures(AIFeatures.class);
-        // Trigger pref defaults
-        new BundlePreferenceStore(getBundle());
+        
+        instance = this;
+        preferences = new BundlePreferenceStore(getBundle());
+        
+        DBRFeatureRegistry.getInstance().registerFeatures(AIBaseFeatures.class);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
         super.stop(context);
+        
+        instance = null;
+        preferences = null;
     }
 
+    public static AIActivator getInstance() {
+        return instance;
+    }
+
+    public BundlePreferenceStore getPreferences() {
+        return preferences;
+    }
 }

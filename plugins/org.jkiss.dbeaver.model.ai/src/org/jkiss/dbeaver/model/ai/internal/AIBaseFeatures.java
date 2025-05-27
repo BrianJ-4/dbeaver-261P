@@ -14,17 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jkiss.dbeaver.ui.editors.sql.ai.internal;
+package org.jkiss.dbeaver.model.ai.internal;
 
 import org.jkiss.dbeaver.model.runtime.features.DBRFeature;
 
 /**
  * Data editor features
  */
-public interface AIFeatures {
+public interface AIBaseFeatures {
 
     DBRFeature CATEGORY_SQL_AI = DBRFeature.createCategory("SQL AI", "SQL AI features");
-
-    DBRFeature SQL_AI_POPUP = DBRFeature.createFeature(CATEGORY_SQL_AI, "Show AI popup");
-    DBRFeature SQL_AI_GENERATE_PROPOSALS = DBRFeature.createFeature(CATEGORY_SQL_AI, "Generate AI proposal");
+    DBRFeature SQL_AI_COMMAND = DBRFeature.createFeature(CATEGORY_SQL_AI, "Generate AI SQL by @ai command");
 }
