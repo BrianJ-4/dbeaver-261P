@@ -138,7 +138,7 @@ public class AuthModelSelector extends Composite implements DBPEventListener {
 
     public void loadSettings(
         @NotNull DBPDataSourceContainer dataSourceContainer,
-        @NotNull DBPAuthModelDescriptor activeAuthModel,
+        @Nullable DBPAuthModelDescriptor activeAuthModel,
         @Nullable String defaultAuthModelId
     ) {
         if (this.activeDataSource != null) {
