@@ -180,7 +180,7 @@ public class AuthModelSelector extends Composite implements DBPEventListener {
     }
 
     @Override
-    public void handleDataSourceEvent(DBPEvent event) {
+    public void handleDataSourceEvent(@NotNull DBPEvent event) {
         if (event.getAction() == DBPEvent.Action.OBJECT_UPDATE &&
             event.getData() instanceof DBPConnectionConfiguration newConfig &&
             event.getObject() == activeDataSource
