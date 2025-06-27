@@ -50,12 +50,9 @@ import org.jkiss.dbeaver.model.struct.rdb.DBSCatalog;
 import org.jkiss.dbeaver.model.struct.rdb.DBSSchema;
 import org.jkiss.dbeaver.runtime.DBWorkbench;
 import org.jkiss.dbeaver.ui.DBeaverIcons;
-import org.jkiss.dbeaver.ui.IDataSourceContainerUpdate;
 import org.jkiss.dbeaver.ui.UIUtils;
 import org.jkiss.dbeaver.ui.actions.AbstractDataSourceHandler;
-import org.jkiss.dbeaver.ui.editors.DatabaseEditorContext;
 import org.jkiss.dbeaver.ui.editors.DatabaseLazyEditorInput;
-import org.jkiss.dbeaver.ui.editors.EditorUtils;
 import org.jkiss.dbeaver.ui.editors.IDatabaseEditorInput;
 import org.jkiss.dbeaver.ui.editors.entity.EntityEditor;
 import org.jkiss.dbeaver.ui.navigator.NavigatorPreferences;
@@ -232,29 +229,6 @@ public class SelectActiveSchemaHandler extends AbstractDataSourceHandler impleme
                 }
             }.schedule();
         }
-        // Save changes in editor state
-        if (activeEditor instanceof IDataSourceContainerUpdate dscu ) {
-            IEditorInput editorInput = activeEditor.getEditorInput();
-            DatabaseEditorContext editorContext = new DatabaseEditorContext() {
-                @Nullable
-                @Override
-                public DBCExecutionContext getExecutionContext() {
-                    return executionContext;
-                }
-
-                @Override
-                public DBPDataSourceContainer getDataSourceContainer() {
-                    return dscu.getDataSourceContainer();
-                }
-
-                @Override
-                public DBSObject getSelectedObject() {
-                    return null;
-                }
-            };
-            EditorUtils.setInputDataSource(editorInput, editorContext);
-        }
-
     }
 
     public static class MenuContributor extends DataSourceMenuContributor {
