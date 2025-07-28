@@ -122,16 +122,15 @@ public class ExplainPlanViewer extends Viewer implements IAdaptable
             ((GridLayout)tabViewFolder.getLayout()).marginTop = 20;
             tabViewFolder.setLayoutData(new GridData(GridData.FILL_VERTICAL));
             SQLPlanViewRegistry instance = SQLPlanViewRegistry.getInstance();
-            for (SQLPlanViewDescriptor viewDesc : instance.getPlanViewDescriptors()) {
-                DBPDataSource currentDataSource = null;
-                if (this.contextProvider != null && this.contextProvider.getExecutionContext() != null) {
-                    currentDataSource = this.contextProvider.getExecutionContext().getDataSource();
-                }
+            DBPDataSource currentDataSource = null;
+            if (this.contextProvider != null && this.contextProvider.getExecutionContext() != null) {
+                currentDataSource = this.contextProvider.getExecutionContext().getDataSource();
+            }
 
-                if (currentDataSource == null || !viewDesc.supportedBy((currentDataSource))) {
+            for (SQLPlanViewDescriptor viewDesc : instance.getPlanViewDescriptors()) {
+                if (viewDesc.isDataSourceSpecific() && !viewDesc.supportedBy(currentDataSource)) {
                     continue;
                 }
-
                 VerticalButton treeViewButton = new VerticalButton(tabViewFolder, SWT.LEFT | SWT.RADIO);
                 treeViewButton.setText(viewDesc.getLabel());
                 if (!CommonUtils.isEmpty(viewDesc.getDescription())) {

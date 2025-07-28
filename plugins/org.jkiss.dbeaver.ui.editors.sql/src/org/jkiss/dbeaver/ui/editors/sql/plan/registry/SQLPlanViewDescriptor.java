@@ -97,6 +97,10 @@ public class SQLPlanViewDescriptor extends AbstractContextDescriptor {
         return result;
     }
 
+    public boolean isDataSourceSpecific() {
+        return !supportedDataSources.isEmpty();
+    }
+
     public boolean supportedBy(@Nullable DBPDataSource dataSource) {
         if (dataSource == null) {
             return true;
