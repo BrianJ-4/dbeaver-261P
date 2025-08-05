@@ -16,9 +16,7 @@
  */
 package org.jkiss.dbeaver.ext.cubrid.edit;
 
-import java.util.List;
-import java.util.Map;
-
+import org.jkiss.code.NotNull;
 import org.jkiss.dbeaver.ext.cubrid.model.CubridDataSource;
 import org.jkiss.dbeaver.ext.cubrid.model.CubridProcedure;
 import org.jkiss.dbeaver.ext.cubrid.model.CubridUser;
@@ -39,7 +37,7 @@ import java.util.Map;
 public class CubridProcedureManager extends GenericProcedureManager {
 
     @Override
-    public boolean canCreateObject(Object container) {
+    public boolean canCreateObject(@NotNull Object container) {
         CubridUser user = (CubridUser) container;
         CubridDataSource dataSource = (CubridDataSource) user.getDataSource();
         return dataSource.isShard();
@@ -57,31 +55,38 @@ public class CubridProcedureManager extends GenericProcedureManager {
 
     @Override
     protected GenericProcedure createDatabaseObject(
-        DBRProgressMonitor monitor, DBECommandContext context, final Object container,
-        Object from, Map<String, Object> options) {
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBECommandContext context,
+        final Object container,
+        Object from,
+        Map<String, Object> options
+    ) {
         String type = options.get("container").toString();
         DBSProcedureType procedureType = type.equals("Functions")
-                ? DBSProcedureType.FUNCTION : DBSProcedureType.PROCEDURE;
+            ? DBSProcedureType.FUNCTION : DBSProcedureType.PROCEDURE;
         return new CubridProcedure((GenericStructContainer) container, procedureType);
     }
 
     @Override
     protected void addObjectCreateActions(
-        DBRProgressMonitor monitor,
-        DBCExecutionContext executionContext,
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBCExecutionContext executionContext,
         List<DBEPersistAction> actions,
         ObjectCreateCommand command,
-        Map<String, Object> options) throws DBCException {
+        @NotNull Map<String, Object> options
+    ) throws DBCException {
         CubridProcedure procedure = (CubridProcedure) command.getObject();
         actions.add(new SQLDatabasePersistAction("Create Procedure", procedure.getSource()));
     }
 
     @Override
-    protected void addObjectModifyActions(@NotNull DBRProgressMonitor monitor,
-            @NotNull DBCExecutionContext executionContext,
-            @NotNull List<DBEPersistAction> actionList,
-            @NotNull ObjectChangeCommand objectChangeCommand,
-            @NotNull Map<String, Object> options) {
+    protected void addObjectModifyActions(
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBCExecutionContext executionContext,
+        @NotNull List<DBEPersistAction> actionList,
+        @NotNull ObjectChangeCommand objectChangeCommand,
+        @NotNull Map<String, Object> options
+    ) {
         CubridProcedure procedure = (CubridProcedure) objectChangeCommand.getObject();
         actionList.add(new SQLDatabasePersistAction("Modify Procedure", procedure.getSource()));
     }

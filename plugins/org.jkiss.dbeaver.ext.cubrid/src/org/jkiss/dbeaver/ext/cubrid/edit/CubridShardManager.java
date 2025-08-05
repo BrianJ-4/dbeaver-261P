@@ -16,9 +16,6 @@
  */
 package org.jkiss.dbeaver.ext.cubrid.edit;
 
-import java.util.List;
-import java.util.Map;
-
 import org.jkiss.code.NotNull;
 import org.jkiss.dbeaver.DBException;
 import org.jkiss.dbeaver.ext.cubrid.model.CubridShard;
@@ -35,15 +32,19 @@ import org.jkiss.dbeaver.model.struct.cache.DBSObjectCache;
 import org.jkiss.dbeaver.runtime.DBWorkbench;
 import org.jkiss.dbeaver.utils.PrefUtils;
 
+import java.util.List;
+import java.util.Map;
+
 public class CubridShardManager extends SQLObjectEditor<CubridShard, GenericStructContainer> {
 
     @Override
     protected void addObjectModifyActions(
-            @NotNull DBRProgressMonitor monitor,
-            @NotNull DBCExecutionContext executionContext,
-            @NotNull List<DBEPersistAction> actions,
-            @NotNull ObjectChangeCommand command,
-            @NotNull Map<String, Object> options) {
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBCExecutionContext executionContext,
+        @NotNull List<DBEPersistAction> actions,
+        @NotNull ObjectChangeCommand command,
+        @NotNull Map<String, Object> options
+    ) {
         CubridShard shard = command.getObject();
         DBPPreferenceStore store = DBWorkbench.getPlatform().getPreferenceStore();
         store.setValue("shardType", shard.getName());
@@ -58,11 +59,11 @@ public class CubridShardManager extends SQLObjectEditor<CubridShard, GenericStru
 
     @Override
     public boolean canDeleteObject(@NotNull CubridShard object) {
-    	return false;
+        return false;
     }
 
     @Override
-    public long getMakerOptions(DBPDataSource dataSource) {
+    public long getMakerOptions(@NotNull DBPDataSource dataSource) {
         return 0;
     }
 
@@ -72,24 +73,35 @@ public class CubridShardManager extends SQLObjectEditor<CubridShard, GenericStru
     }
 
     @Override
-    protected CubridShard createDatabaseObject(DBRProgressMonitor monitor, DBECommandContext context, Object container,
-            Object copyFrom, Map<String, Object> options) throws DBException {
+    protected CubridShard createDatabaseObject(
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBECommandContext context,
+        Object container,
+        Object copyFrom,
+        @NotNull Map<String, Object> options
+    ) throws DBException {
         return null;
     }
 
     @Override
-    protected void addObjectCreateActions(DBRProgressMonitor monitor, DBCExecutionContext executionContext,
-            List<DBEPersistAction> actions,
-            SQLObjectEditor<CubridShard, GenericStructContainer>.ObjectCreateCommand command,
-            Map<String, Object> options) throws DBException {
+    protected void addObjectCreateActions(
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBCExecutionContext executionContext,
+        @NotNull List<DBEPersistAction> actions,
+        @NotNull SQLObjectEditor<CubridShard, GenericStructContainer>.ObjectCreateCommand command,
+        @NotNull Map<String, Object> options
+    ) {
         /* This body intentionally empty. */
     }
 
     @Override
-    protected void addObjectDeleteActions(DBRProgressMonitor monitor, DBCExecutionContext executionContext,
-            List<DBEPersistAction> actions,
-            SQLObjectEditor<CubridShard, GenericStructContainer>.ObjectDeleteCommand command,
-            Map<String, Object> options) throws DBException {
+    protected void addObjectDeleteActions(
+        @NotNull DBRProgressMonitor monitor,
+        @NotNull DBCExecutionContext executionContext,
+        @NotNull List<DBEPersistAction> actions,
+        @NotNull SQLObjectEditor<CubridShard, GenericStructContainer>.ObjectDeleteCommand command,
+        @NotNull Map<String, Object> options
+    ) {
         /* This body intentionally empty. */
     }
 }
