@@ -18,6 +18,8 @@ package org.jkiss.dbeaver.ext.cubrid.edit;
 
 import org.jkiss.code.NotNull;
 import org.jkiss.dbeaver.DBException;
+import org.jkiss.dbeaver.ext.cubrid.model.CubridDataSource;
+import org.jkiss.dbeaver.ext.cubrid.model.CubridTable;
 import org.jkiss.dbeaver.ext.cubrid.model.CubridTrigger;
 import org.jkiss.dbeaver.ext.generic.edit.GenericTriggerManager;
 import org.jkiss.dbeaver.ext.generic.model.GenericTableBase;
@@ -38,8 +40,10 @@ public class CubridTriggerManager extends GenericTriggerManager<CubridTrigger> {
     public static final String BASE_TRIGGER_NAME = "new_trigger";
 
     @Override
-    public boolean canCreateObject(@NotNull Object container) {
-        return container instanceof GenericTableBase;
+    public boolean canCreateObject(Object container) {
+        CubridTable table = (CubridTable) container;
+        boolean isShard = table.getDataSource().isShard();
+        return isShard ? false : container instanceof GenericTableBase;
     }
 
     @Override
@@ -122,4 +126,13 @@ public class CubridTriggerManager extends GenericTriggerManager<CubridTrigger> {
         }
     }
 
+    @Override
+    public boolean canEditObject(CubridTrigger object) {
+        return !((CubridDataSource) object.getDataSource()).isShard();
+    }
+
+    @Override
+    public boolean canDeleteObject(CubridTrigger object) {
+        return !((CubridDataSource) object.getDataSource()).isShard();
+    }
 }
