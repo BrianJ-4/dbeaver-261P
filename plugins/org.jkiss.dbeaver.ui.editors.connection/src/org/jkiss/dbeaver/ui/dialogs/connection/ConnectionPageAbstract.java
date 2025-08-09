@@ -147,6 +147,10 @@ public abstract class ConnectionPageAbstract extends DialogPage implements IData
                 driverSubstitutionCombo.select(0);
             }
         }
+
+        if (databaseDocumentationInfoLabel != null) {
+            UIUtils.setInfoLinkText(databaseDocumentationInfoLabel, site.getDriver().getFullName() + " ");
+        }
     }
 
     @Override
