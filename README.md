@@ -39,7 +39,7 @@ You can change default JDK version by replacing directory `jre` in dbeaver insta
 
 ## Architecture
 
-- DBeaver is written on Java (21+).
+- DBeaver is written mostly on Java. However, it also uses a set of native OS-specific components for desktop UI, high performance database drivers and networking.
 - Basic frameworks:
   - [OSGI](https://en.wikipedia.org/wiki/OSGi) platform for plugins and dependency management. Community version consists of 130+ plugins.
   - [Eclipse RCP](https://github.com/eclipse-platform/eclipse.platform.ui/blob/master/docs/Rich_Client_Platform.md) platform for rich user interface build.
