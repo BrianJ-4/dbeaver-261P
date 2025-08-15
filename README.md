@@ -59,7 +59,7 @@ MySQL, MariaDB, Oracle, DB2, PostgreSQL, SQL Server, Sybase, Apache Hive, Drill,
 ### PRO versions
 
 <a href="https://dbeaver.com/download/">Commercial versions</a> extends functionality of many popular drivers and also support non-JDBC datasources such as:
-MongoDB, Cassandra, Couchbase, CouchDB, Redis, InfluxDB, Firestore, BigTable, DynamoDB, Kafka KSQL, Neo4j, Neptune, Timestream.  
+ODBC, MongoDB, Cassandra, Couchbase, CouchDB, Redis, InfluxDB, Firestore, BigTable, DynamoDB, Kafka KSQL, Neo4j, AWS Neptune, AWS Timestream, Azure CosmosDB, Yugabyte, Salesforce, etc.  
 Also, we support flat files as databases: CSV, XLSX, Json, XML, Parquet.  
 You can find the list of all databases supported in commercial versions <a href="https://dbeaver.com/databases/">here</a>.
 
