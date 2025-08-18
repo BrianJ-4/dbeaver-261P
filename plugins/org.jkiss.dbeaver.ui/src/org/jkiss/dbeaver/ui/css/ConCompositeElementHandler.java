@@ -16,15 +16,14 @@
  */
 package org.jkiss.dbeaver.ui.css;
 
-public class DBStyles {
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Widget;
 
-    public static final String COLORED_BY_CONNECTION_TYPE = "coloredByConnectionType";
-    public static final String EXCLUDED_FROM_STYLING = "excludedFromStyling";
+public class ConCompositeElementHandler extends CustomCompositeElementHandler {
 
-    public static final String DATABASE_EDITOR_COMPOSITE_DATASOURCE = "databaseEditorCompositeBackground";
-
-    private DBStyles() {
+    @Override
+    protected boolean isBackgroundByConnectionType(Control ctrl, Widget widget) {
+        return true;
     }
-
 
 }

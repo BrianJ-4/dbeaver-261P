@@ -16,15 +16,19 @@
  */
 package org.jkiss.dbeaver.ui.css;
 
-public class DBStyles {
+import org.eclipse.e4.ui.css.core.dom.IElementProvider;
+import org.eclipse.e4.ui.css.core.engine.CSSEngine;
+import org.jkiss.dbeaver.ui.ConComposite;
+import org.w3c.dom.Element;
 
-    public static final String COLORED_BY_CONNECTION_TYPE = "coloredByConnectionType";
-    public static final String EXCLUDED_FROM_STYLING = "excludedFromStyling";
+public class ConElementProvider implements IElementProvider {
 
-    public static final String DATABASE_EDITOR_COMPOSITE_DATASOURCE = "databaseEditorCompositeBackground";
+    @Override
+    public Element getElement(Object element, CSSEngine engine) {
+        if (element instanceof ConComposite mc) {
+            return new ConCompositeElement(mc, engine);
+        }
 
-    private DBStyles() {
+        return null;
     }
-
-
 }
