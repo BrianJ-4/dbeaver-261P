@@ -33,7 +33,7 @@ import org.w3c.dom.css.CSSValue;
 
 public class ConControlElementHandler extends CSSPropertyBackgroundSWTHandler {
 
-    private static final Class<?>[] EXCLUDE_CLASSES = { Tree.class, Table.class, Button.class };
+    private static final Class<?>[] EXCLUDE_CLASSES = { Tree.class, Table.class };
 
     @Override
     public void applyCSSPropertyBackgroundColor(
@@ -72,6 +72,10 @@ public class ConControlElementHandler extends CSSPropertyBackgroundSWTHandler {
         if (ctrl instanceof Text || ctrl instanceof StyledText) {
             return CommonUtils.isBitSet(ctrl.getStyle(), SWT.BORDER);
         }
+        if (ctrl instanceof Button) {
+            return !CommonUtils.isBitSet(ctrl.getStyle(), SWT.CHECK) && !CommonUtils.isBitSet(ctrl.getStyle(), SWT.RADIO);
+        }
+
         return false;
     }
 
