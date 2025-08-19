@@ -50,8 +50,10 @@ public class CSSUtils {
         widget.setData(EXCLUDED_FROM_STYLING, Boolean.TRUE);
     }
 
-    public static void markConnectionTypeColor(Widget widget){
-        widget.setData(CSSSWTConstants.CSS_CLASS_NAME_KEY, COLORED_BY_CONNECTION_TYPE);
+    public static void markConnectionTypeColor(Widget widget) {
+        if (widget != null && !widget.isDisposed()) {
+            widget.setData(CSSSWTConstants.CSS_CLASS_NAME_KEY, COLORED_BY_CONNECTION_TYPE);
+        }
     }
 
     public static Color getCurrentEditorConnectionColor(Widget widget) {
