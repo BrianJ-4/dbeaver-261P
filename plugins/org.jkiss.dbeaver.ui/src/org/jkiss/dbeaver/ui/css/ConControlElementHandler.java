@@ -84,6 +84,14 @@ public class ConControlElementHandler extends CSSPropertyBackgroundSWTHandler {
             if (CSSUtils.isExcludeFromStyling(control)) {
                 return false;
             }
+            if (control.getClass().getName().contains("FindReplaceOverlay")) {
+                // FIXME: dirty hack to exclude Find/Replace floating panel
+                return false;
+            }
+            // Should we use def Eclipse approach? Generally it is all canvases and composites
+//            if (CompositeElement.hasBackgroundOverriddenByCSS(control)) {
+//                return false;
+//            }
             if (control instanceof ConComposite || CSSUtils.isDatabaseColored(control)) {
                 return true;
             }
