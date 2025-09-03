@@ -20,10 +20,7 @@ package org.jkiss.dbeaver.ui.controls;
 import org.eclipse.jface.fieldassist.ComboContentAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -63,7 +60,6 @@ public class CustomFormEditor {
 
     private static final String VALUE_KEY = "form.data.value";
     private static final String LIST_VALUE_KEY = "form.data.list.value";
-    private static final String ORIGINAL_VALUE = "value.original";
 
     private final Map<DBPPropertyDescriptor, Control> editorMap = new HashMap<>();
     @Nullable
@@ -349,17 +345,29 @@ public class CustomFormEditor {
                 GridData gd = new GridData(GridData.FILL_HORIZONTAL);
                 curButtonsContainer.setLayoutData(gd);
             }
-            Button editor = UIUtils.createCheckbox(curButtonsContainer, propertyDisplayName, "", CommonUtils.toBoolean(value), 1);
-            if (readOnly) {
-                // Do not set it disabled because it looks bad
-                // Just disable editing
-                //editor.setEnabled(false);
-                editor.addSelectionListener(SelectionListener.widgetSelectedAdapter(selectionEvent -> {
-                    Object data = editor.getData(ORIGINAL_VALUE);
-                    if (data instanceof Boolean bValue) {
-                        editor.setSelection(bValue);
+            Composite bPH = UIUtils.createComposite(curButtonsContainer, 2);
+            ((GridLayout)bPH.getLayout()).marginRight = 10;
+            Button editor = UIUtils.createCheckbox(
+                bPH,
+                "",
+                "",
+                CommonUtils.toBoolean(value),
+                1
+            );
+            Label label = UIUtils.createLabel(bPH, propertyDisplayName);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseUp(MouseEvent e) {
+                    // Handle click on label
+                    if (editor.isEnabled()) {
+                        editor.setSelection(!editor.getSelection());
+                        editor.notifyListeners(SWT.Selection, new Event());
                     }
-                }));
+                }
+            });
+
+            if (readOnly) {
+                editor.setEnabled(false);
             }
             return editor;
         } else if (!readOnly && propType.isEnum()) {
@@ -456,10 +464,6 @@ public class CustomFormEditor {
                 link.setData(value);
                 link.setText(getLinkTitle(value));
             }
-        }
-
-        if (editorControl != null) {
-            editorControl.setData(ORIGINAL_VALUE, value);
         }
     }
 
