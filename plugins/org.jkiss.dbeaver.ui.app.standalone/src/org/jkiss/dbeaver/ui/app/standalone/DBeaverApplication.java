@@ -52,6 +52,7 @@ import org.jkiss.dbeaver.model.impl.app.BaseWorkspaceImpl;
 import org.jkiss.dbeaver.model.preferences.DBPPreferenceStore;
 import org.jkiss.dbeaver.model.rcp.DesktopApplicationImpl;
 import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;
+import org.jkiss.dbeaver.registry.BasePlatformImpl;
 import org.jkiss.dbeaver.registry.SWTBrowserRegistry;
 import org.jkiss.dbeaver.registry.timezone.TimezoneRegistry;
 import org.jkiss.dbeaver.registry.updater.VersionDescriptor;
@@ -105,8 +106,6 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
     public static final String DEFAULT_WORKSPACE_FOLDER = "workspace6";
     public static final String DEFAULT_WORKSPACES_FILE = ".workspaces";
 
-    private static final String PLUGINS_FOLDER = ".plugins";
-    private static final String CORE_RESOURCES_PLUGIN_FOLDER = "org.eclipse.core.resources";
     private static final String STARTUP_ACTIONS_FILE = "dbeaver-startup-actions.properties";
     private static final String RESET_USER_PREFERENCES = "reset_user_preferences";
     private static final String RESET_WORKSPACE_CONFIGURATION = "reset_workspace_configuration";
@@ -136,7 +135,7 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
     private long lastUserActivityTime = -1;
 
     public DBeaverApplication() {
-        this(DesktopPlatform.DBEAVER_DATA_DIR, DEFAULT_WORKSPACE_FOLDER, DEFAULT_WORKSPACES_FILE);
+        this(BasePlatformImpl.DBEAVER_DATA_DIR, DEFAULT_WORKSPACE_FOLDER, DEFAULT_WORKSPACES_FILE);
     }
 
     protected DBeaverApplication(String defaultWorkspaceLocation, String defaultAppWorkspaceName, String defaultWorkspacesFile) {
@@ -435,13 +434,11 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
                 shell.setText(ChooseWorkspaceDialog.getWindowTitle());
                 shell.setImages(Window.getDefaultImages());
 
-                Log.Listener splashListener = (message, t) -> {
+                Log.Listener splashListener = (message, t) ->
                     DBeaverSplashHandler.showMessage(CommonUtils.toString(message));
-                };
                 Log.addListener(splashListener);
-                shell.addDisposeListener(e -> {
-                    Log.removeListener(splashListener);
-                });
+                shell.addDisposeListener(e ->
+                    Log.removeListener(splashListener));
                 DBeaverSplashHandler.showMessage("Starting " + Platform.getProduct().getName());
             }
         } catch (Throwable e) {
@@ -596,8 +593,7 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
                 try {
                     Files.createDirectories(metadataFolder);
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    System.err.println("Error creating metadata folder: " + metadataFolder);
+                    System.err.println("Error creating metadata folder '" + metadataFolder + "': " + e.getMessage());
                 }
             }
         } else {
@@ -841,14 +837,15 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
         if (!resetUserPreferences && !resetWorkspaceConfiguration) {
             return;
         }
-        Path path = instancePath.resolve(PLUGINS_FOLDER);
+        Path path = instancePath.resolve(WORKSPACE_PLUGINS_FOLDER);
         if (Files.notExists(path) || !Files.isDirectory(path)) {
             return;
         }
 
         Files.walkFileTree(path, new SimpleFileVisitor<>() {
+            @NotNull
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+            public FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) {
                 log.trace("Deleting " + file);
 
                 try {
@@ -860,25 +857,27 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
                 return FileVisitResult.CONTINUE;
             }
 
+            @NotNull
             @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                if (dir.endsWith(PLUGINS_FOLDER)) {
+            public FileVisitResult preVisitDirectory(Path dir, @NotNull BasicFileAttributes attrs) {
+                if (dir.endsWith(WORKSPACE_PLUGINS_FOLDER)) {
                     return FileVisitResult.CONTINUE;
                 }
 
                 final Path relative = path.relativize(dir);
 
-                if (resetUserPreferences && !relative.startsWith(CORE_RESOURCES_PLUGIN_FOLDER)) {
+                if (resetUserPreferences && !relative.startsWith(CORE_RESOURCES_PLUGIN_ID)) {
                     return FileVisitResult.CONTINUE;
                 }
 
-                if (resetWorkspaceConfiguration && relative.startsWith(CORE_RESOURCES_PLUGIN_FOLDER)) {
+                if (resetWorkspaceConfiguration && relative.startsWith(CORE_RESOURCES_PLUGIN_ID)) {
                     return FileVisitResult.CONTINUE;
                 }
 
                 return FileVisitResult.SKIP_SUBTREE;
             }
 
+            @NotNull
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
                 log.trace("Deleting " + dir);
@@ -894,7 +893,7 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
         });
     }
 
-    private class ProxyPrintStream extends OutputStream {
+    private static class ProxyPrintStream extends OutputStream {
         private final OutputStream debugWriter;
         private final OutputStream stdOut;
 
