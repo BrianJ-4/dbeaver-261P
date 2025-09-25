@@ -63,8 +63,7 @@ public class ConControlElementHandler extends CSSPropertyBackgroundSWTHandler {
         if (widget instanceof Control ctrl &&
             !UIUtils.isInDialog(ctrl) &&
             !isExcludedFromStyling(ctrl) &&
-            isOverridesBackground(ctrl) &&
-            !CompositeElement.hasBackgroundOverriddenByCSS(ctrl)
+            isOverridesBackground(ctrl)
         ) {
             Color newColor = CSSUtils.getCurrentEditorConnectionColor(widget);
             if (newColor != null) {
