@@ -1104,7 +1104,7 @@ public class PostgreSchema implements
             }
             sql.append(
                 """
-                    FROM pg_catalog.pg_index i
+                    \sFROM pg_catalog.pg_index i
                     INNER JOIN pg_catalog.pg_class c ON c.oid=i.indexrelid
                     INNER JOIN pg_catalog.pg_class tc ON tc.oid=i.indrelid
                     LEFT OUTER JOIN pg_catalog.pg_description dsc ON i.indexrelid=dsc.objoid
