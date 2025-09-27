@@ -121,8 +121,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 /**
@@ -364,6 +364,9 @@ public class ResultSetViewer extends Viewer
                 trControl.setLayout(new FillLayout());
                 CSSUtils.setExcludeFromStyling(trControl);
                 ToolBar panelToolbarControl = this.panelToolBar.createControl(trControl);
+
+                UIUtils.mimicControlBackground(trControl, panelFolder);
+                this.panelToolBar.createControl(trControl);
                 this.panelFolder.setTopRight(trControl, SWT.RIGHT | SWT.WRAP);
                 this.panelFolder.addSelectionListener(new SelectionAdapter() {
                     @Override
