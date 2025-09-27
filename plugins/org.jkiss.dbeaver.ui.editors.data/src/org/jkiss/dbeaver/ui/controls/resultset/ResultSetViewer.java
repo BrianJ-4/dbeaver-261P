@@ -302,6 +302,7 @@ public class ResultSetViewer extends Viewer
                 (decoratorFeatures & IResultSetDecorator.FEATURE_COMPACT_FILTERS) != 0);
             GridData gd = new GridData(GridData.FILL_HORIZONTAL);
             gd.horizontalSpan = ((GridLayout) mainPanel.getLayout()).numColumns;
+            gd.verticalIndent = 3;
             this.filtersPanel.setLayoutData(gd);
         }
 
@@ -359,8 +360,9 @@ public class ResultSetViewer extends Viewer
                 });
 
                 this.panelToolBar = new ToolBarManager(SWT.HORIZONTAL | SWT.RIGHT | SWT.FLAT);
-                Composite trControl = new ConComposite(panelFolder, SWT.NONE);
+                Composite trControl = new Composite(panelFolder, SWT.NONE);
                 trControl.setLayout(new FillLayout());
+                CSSUtils.setExcludeFromStyling(trControl);
                 ToolBar panelToolbarControl = this.panelToolBar.createControl(trControl);
                 this.panelFolder.setTopRight(trControl, SWT.RIGHT | SWT.WRAP);
                 this.panelFolder.addSelectionListener(new SelectionAdapter() {
