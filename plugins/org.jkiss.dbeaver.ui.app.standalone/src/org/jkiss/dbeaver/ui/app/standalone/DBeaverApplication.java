@@ -18,6 +18,7 @@ package org.jkiss.dbeaver.ui.app.standalone;
 
 import org.apache.commons.cli.CommandLine;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.jface.window.Window;
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.WindowsDefenderConfigurator;
 import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.ui.internal.ide.ChooseWorkspaceDialog;
 import org.jkiss.code.NotNull;
@@ -52,6 +54,7 @@ import org.jkiss.dbeaver.model.impl.app.BaseWorkspaceImpl;
 import org.jkiss.dbeaver.model.preferences.DBPPreferenceStore;
 import org.jkiss.dbeaver.model.rcp.DesktopApplicationImpl;
 import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;
+import org.jkiss.dbeaver.registry.ApplicationPolicyProvider;
 import org.jkiss.dbeaver.registry.BasePlatformImpl;
 import org.jkiss.dbeaver.registry.SWTBrowserRegistry;
 import org.jkiss.dbeaver.registry.timezone.TimezoneRegistry;
@@ -102,6 +105,7 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
 
     public static final String DEFAULT_WORKSPACE_FOLDER = "workspace6";
     public static final String DEFAULT_WORKSPACES_FILE = ".workspaces";
+    public static final String POLICY_WD_CHECK_SUPPRESS = "policy.wd.check.disabled"; //$NON-NLS-1$
 
     private static final String STARTUP_ACTIONS_FILE = "dbeaver-startup-actions.properties";
     private static final String RESET_USER_PREFERENCES = "reset_user_preferences";
@@ -464,7 +468,15 @@ public class DBeaverApplication extends DesktopApplicationImpl implements DBPApp
      * May be overrided in implementors
      */
     protected void initializeApplication() {
-
+        if (ApplicationPolicyProvider.getInstance().isPolicyEnabled(POLICY_WD_CHECK_SUPPRESS)) {
+            try {
+                WindowsDefenderConfigurator.savePreference(
+                    ConfigurationScope.INSTANCE,
+                    WindowsDefenderConfigurator.PREFERENCE_STARTUP_CHECK_SKIP, "true"); //$NON-NLS-1$
+            } catch (Exception e) {
+                log.debug(e);
+            }
+        }
     }
 
     private Display getDisplay() {
