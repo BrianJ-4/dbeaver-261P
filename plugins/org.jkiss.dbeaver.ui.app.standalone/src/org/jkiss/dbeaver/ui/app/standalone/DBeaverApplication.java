@@ -46,7 +46,6 @@ import org.jkiss.dbeaver.core.DesktopPlatform;
 import org.jkiss.dbeaver.core.DesktopUI;
 import org.jkiss.dbeaver.model.DBConstants;
 import org.jkiss.dbeaver.model.app.DBPApplicationController;
-import org.jkiss.dbeaver.model.app.DBPApplicationDesktop;
 import org.jkiss.dbeaver.model.app.DBPPlatform;
 import org.jkiss.dbeaver.model.app.DBPWorkspace;
 import org.jkiss.dbeaver.model.cli.CLIProcessResult;
@@ -84,7 +83,7 @@ import java.util.stream.Stream;
 /**
  * This class controls all aspects of the application's execution
  */
-public class DBeaverApplication extends DesktopApplicationImpl implements DBPApplicationDesktop, DBPApplicationController {
+public class DBeaverApplication extends DesktopApplicationImpl implements DBPApplicationController {
 
     private static final Log log = Log.getLog(DBeaverApplication.class);
 
