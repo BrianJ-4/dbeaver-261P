@@ -1034,7 +1034,7 @@ public class ResultSetViewer extends Viewer
             }
         } else {
             if (viewerSash != null && viewerSash.getWeights().length > 1) {
-                viewerSash.hideDown();
+                viewerSash.setMaximizedControl(viewerSash.getChildren()[0]);
             }
         }
 
