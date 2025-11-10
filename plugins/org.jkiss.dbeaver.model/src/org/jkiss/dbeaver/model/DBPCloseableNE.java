@@ -14,29 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jkiss.dbeaver.model.exec.jdbc;
-
-import org.jkiss.code.NotNull;
-import org.jkiss.dbeaver.model.exec.DBCResultSet;
-
-import java.sql.ResultSet;
+package org.jkiss.dbeaver.model;
 
 /**
- * JDBC statement
+ * Closable which doesn't throw errors
  */
-public interface JDBCResultSet extends ResultSet, DBCResultSet {
+public interface DBPCloseableNE extends AutoCloseable {
 
-    @NotNull
-    JDBCSession getSession();
-
-    @NotNull
-    @Override
-    JDBCStatement getSourceStatement();
-
-    ResultSet getOriginal();
-
+    /**
+     * Closes object
+     */
     @Override
     void close();
 
-    void setMaxRows(long rsMaxRows);
 }

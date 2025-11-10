@@ -14,29 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jkiss.dbeaver.model.exec.jdbc;
 
-import org.jkiss.code.NotNull;
-import org.jkiss.dbeaver.model.exec.DBCResultSet;
-
-import java.sql.ResultSet;
+package org.jkiss.dbeaver;
 
 /**
- * JDBC statement
+ * DBRuntimeException
  */
-public interface JDBCResultSet extends ResultSet, DBCResultSet {
+public class DBRuntimeException extends RuntimeException {
+    public DBRuntimeException(String message) {
+        super(message);
+    }
 
-    @NotNull
-    JDBCSession getSession();
+    public DBRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    @NotNull
-    @Override
-    JDBCStatement getSourceStatement();
+    public DBRuntimeException(Throwable cause) {
+        super(cause);
+    }
 
-    ResultSet getOriginal();
-
-    @Override
-    void close();
-
-    void setMaxRows(long rsMaxRows);
 }
