@@ -19,6 +19,8 @@ package org.jkiss.dbeaver.model.sql.registry;
 
 import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.jkiss.code.NotNull;
+import org.jkiss.code.Nullable;
 import org.jkiss.dbeaver.DBException;
 import org.jkiss.dbeaver.model.DBPImage;
 import org.jkiss.dbeaver.model.impl.AbstractContextDescriptor;
@@ -38,8 +40,7 @@ public class SQLCommandHandlerDescriptor extends AbstractContextDescriptor {
     private final DBPImage icon;
     private final Expression enablementExpression;
 
-    public SQLCommandHandlerDescriptor(IConfigurationElement config)
-    {
+    public SQLCommandHandlerDescriptor(@NotNull IConfigurationElement config) {
         super(config);
         this.id = config.getAttribute("id");
         this.label = config.getAttribute("label");
@@ -49,19 +50,22 @@ public class SQLCommandHandlerDescriptor extends AbstractContextDescriptor {
         this.enablementExpression = getEnablementExpression(config);
     }
 
+    @NotNull
     public String getId() {
         return id;
     }
 
-
+    @NotNull
     public String getLabel() {
         return label;
     }
 
+    @Nullable
     public String getDescription() {
         return description;
     }
 
+    @Nullable
     public DBPImage getIcon() {
         return icon;
     }
@@ -70,9 +74,8 @@ public class SQLCommandHandlerDescriptor extends AbstractContextDescriptor {
         return isExpressionTrue(enablementExpression, this);
     }
 
-    public SQLControlCommandHandler createHandler()
-        throws DBException
-    {
+    @NotNull
+    public SQLControlCommandHandler createHandler() throws DBException {
         return implClass.createInstance(SQLControlCommandHandler.class);
     }
 
