@@ -32,7 +32,7 @@ public abstract class AbstractCommandLineParameterHandler implements Runnable {
 
 
     @NotNull
-    protected CommandLineContext getContext() {
+    protected CommandLineContext context() {
         return parent.getContext();
     }
 }
