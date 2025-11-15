@@ -32,10 +32,10 @@ public abstract class CommandLineWithAuth extends AbstractCommandLineParameterHa
 
     @Override
     public void run() {
-        if (context().getContextParameter(CLIConstants.CONTEXT_PARAM_AUTHENTICATOR) != null) {
+        if (getContext().getContextParameter(CLIConstants.CONTEXT_PARAM_AUTHENTICATOR) != null) {
             try {
-                ((CommandLineAuthenticator) context().getContextParameter(CLIConstants.CONTEXT_PARAM_AUTHENTICATOR))
-                    .authenticate(authenticateOptions, context());
+                ((CommandLineAuthenticator) getContext().getContextParameter(CLIConstants.CONTEXT_PARAM_AUTHENTICATOR))
+                    .authenticate(authenticateOptions, getContext());
             } catch (DBException e) {
                 throw new CLIException("Authentication failed: " + e.getMessage(), e, CLIConstants.EXIT_CODE_ERROR);
             }
