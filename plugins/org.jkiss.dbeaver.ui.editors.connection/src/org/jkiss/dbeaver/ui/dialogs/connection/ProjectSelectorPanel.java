@@ -45,21 +45,33 @@ public class ProjectSelectorPanel {
     private Label headerLabel;
     private DBPProject selectedProject;
 
-    public ProjectSelectorPanel(@NotNull Composite parent, @Nullable DBPProject activeProject, int style) {
+    public ProjectSelectorPanel(
+        @NotNull Composite parent, @Nullable DBPProject activeProject, int style) {
         this(parent, activeProject, style, false, true);
     }
 
-    public ProjectSelectorPanel(@NotNull Composite parent, @Nullable DBPProject activeProject, int style, boolean showOnlyEditable) {
+    public ProjectSelectorPanel(
+        @NotNull Composite parent,
+        @Nullable DBPProject activeProject,
+        int style,
+        boolean showOnlyEditable
+    ) {
         this(parent, activeProject, style, showOnlyEditable, true);
     }
 
-    public ProjectSelectorPanel(@NotNull Composite parent, @Nullable DBPProject activeProject, int style, boolean showOnlyEditable, boolean alignRight) {
+    public ProjectSelectorPanel(
+        @NotNull Composite parent,
+        @Nullable DBPProject activeProject,
+        int style,
+        boolean showOnlyEditable,
+        boolean alignRight
+    ) {
         final List<? extends DBPProject> projects = DBWorkbench.getPlatform().getWorkspace().getProjects();
         if (showOnlyEditable) {
             projects.removeIf(p -> !p.hasRealmPermission(RMConstants.PERMISSION_PROJECT_DATASOURCES_EDIT));
         }
         if (projects.size() == 1) {
-            selectedProject = projects.get(0);
+            selectedProject = projects.getFirst();
         } else if (projects.size() > 1) {
 
             boolean showIcon = (style & SWT.ICON) != 0;
@@ -78,9 +90,12 @@ public class ProjectSelectorPanel {
             }
 
             if (selectedProject == null) {
-                selectedProject = NavigatorUtils.getSelectedProject();
+                selectedProject = activeProject;
+                if (selectedProject == null) {
+                    selectedProject = NavigatorUtils.getSelectedProject();
+                }
                 if (!projects.contains(selectedProject)) {
-                    selectedProject = projects.get(0);
+                    selectedProject = projects.getFirst();
                 }
             }
             projectCombo.setText(selectedProject.getName());
@@ -91,10 +106,6 @@ public class ProjectSelectorPanel {
                     onProjectChange();
                 }
             });
-
-            if (projects.size() < 2) {
-                //projectCombo.setEnabled(false);
-            }
         }
     }
 
@@ -102,6 +113,7 @@ public class ProjectSelectorPanel {
 
     }
 
+    @Nullable
     public DBPProject getSelectedProject() {
         return selectedProject;
     }
