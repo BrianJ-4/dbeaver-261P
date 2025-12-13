@@ -482,8 +482,9 @@ public class DBExecUtils {
             DBCTransactionManager transactionManager = DBUtils.getTransactionManager(executionContext);
             if (transactionManager != null) {
                 new AbstractJob("Recover smart commit mode") {
+                    @NotNull
                     @Override
-                    protected IStatus run(DBRProgressMonitor monitor) {
+                    protected IStatus run(@NotNull DBRProgressMonitor monitor) {
                         if (!executionContext.isConnected()) {
                             return Status.OK_STATUS;
                         }
