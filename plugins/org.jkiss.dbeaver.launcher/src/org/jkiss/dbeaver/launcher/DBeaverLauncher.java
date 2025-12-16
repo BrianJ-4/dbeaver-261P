@@ -612,6 +612,9 @@ public class DBeaverLauncher {
                 openLogFile();
             }
             log.write(e.getMessage());
+            if (debug) {
+                System.out.println("Error processing remote command line: " + e.getMessage());
+            }
         }
         Path secretStoragePath = useCustomSecretStorage(dbeaverDataDir);
         if (secretStoragePath != null) {
@@ -719,15 +722,24 @@ public class DBeaverLauncher {
             }
             return new CommandLineExecuteResult(cliMode);
         }
+        if (debug) {
+            System.out.println("Executing remote command line: " + Arrays.toString(args));
+        }
         Path workspacePath = detectDefaultWorkspaceLocation(args, dbeaverDataDir);
         if (debug) {
             System.out.println("Detected workspace location: " + workspacePath);
         }
         if (args == null || args.length == 0 || newInstance) {
+            if (debug) {
+                System.out.println("Empty arguments or new instance requested, skipping remote CLI processing.");
+            }
             return new CommandLineExecuteResult(cliMode);
         }
 
         if (Files.notExists(workspacePath)) {
+            if (debug) {
+                System.out.println("Workspace not exists: " + workspacePath);
+            }
             return new CommandLineExecuteResult(cliMode);
         }
         Integer serverPort = readDBeaverServerPort(workspacePath);
@@ -845,6 +857,18 @@ public class DBeaverLauncher {
                 customWorkspacePath = args[++i];
                 break;
             }
+        }
+        if (productName.isEmpty()) {
+            Properties properties = loadEclipseProductProperties();
+            if (debug) {
+                System.out.println("Loaded eclipse product properties: " + properties);
+            }
+            if (properties.containsKey(Constants.PROPERTY_ECLIPSE_PRODUCT_ID)) {
+                productName = properties.getProperty(Constants.PROPERTY_ECLIPSE_PRODUCT_ID);
+            }
+        }
+        if (debug) {
+            System.out.println("product name: " + productName);
         }
         if (customWorkspacePath != null) {
             return Path.of(customWorkspacePath);
@@ -1643,6 +1667,54 @@ public class DBeaverLauncher {
         if (hashCode < 0)
             hashCode = -(hashCode);
         return String.valueOf(hashCode);
+    }
+
+    private Properties loadEclipseProductProperties() {
+        Properties properties = new Properties();
+
+        URL installURL = null;
+        try {
+            installURL = getInstallLocation();
+        } catch (Exception e) {
+            if (debug) {
+                System.out.println("Could not determine install location to load " + PRODUCT_SITE_MARKER + ": " + e.getMessage());
+            }
+        }
+        if (installURL == null) {
+            if (debug) {
+                System.out.println("Install location is null, cannot load " + PRODUCT_SITE_MARKER);
+            }
+            return properties;
+        }
+
+        Path installPath;
+        try {
+            installPath = Path.of(installURL.toURI());
+        } catch (Exception e) {
+            if (debug) {
+                System.out.println("Could not convert install location " + installURL + ": " + e.getMessage());
+            }
+            return properties;
+        }
+        Path eclipseProduct = installPath.resolve(PRODUCT_SITE_MARKER);
+        if (debug) {
+            System.out.println("Loading product properties from " + eclipseProduct);
+        }
+        if (Files.notExists(eclipseProduct)) {
+            if (debug) {
+                System.out.println("Not exists " + eclipseProduct);
+            }
+            return properties;
+        }
+
+        try (var in = Files.newInputStream(eclipseProduct)) {
+            properties.load(in);
+        } catch (IOException e) {
+            if (debug) {
+                System.out.println("Could not load " + PRODUCT_SITE_MARKER + " file: " + e.getMessage());
+            }
+        }
+        return properties;
     }
 
     /**
