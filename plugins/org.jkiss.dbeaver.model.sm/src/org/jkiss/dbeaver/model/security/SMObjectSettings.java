@@ -14,35 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jkiss.dbeaver.model;
+package org.jkiss.dbeaver.model.security;
 
 import org.jkiss.code.NotNull;
-import org.jkiss.code.Nullable;
 
-/**
- * Provided data source configuration storage
- */
-public interface DBPDataSourceConfigurationStorage {
+import java.util.Map;
 
-    @NotNull
-    String getStorageId();
-
-    @NotNull
-    default String getStorageName() {
-        return getStorageId();
-    }
-
-    boolean isValid();
-
-    boolean isDefault();
-
-    /**
-     * Checks if configuration storage is virtual
-     */
-    boolean isVirtual();
-
-    // Used for secure credentials save/load (it is a prt of credentials file name)
-    @Nullable
-    String getStorageSubId();
-
+public record SMObjectSettings(@NotNull SMObjectType objectType, @NotNull String objectId, @NotNull Map<String, String> settings) {
 }

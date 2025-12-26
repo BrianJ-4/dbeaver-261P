@@ -18,31 +18,30 @@ package org.jkiss.dbeaver.model;
 
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
+import org.jkiss.dbeaver.DBException;
+import org.jkiss.dbeaver.model.security.SMObjectType;
 
-/**
- * Provided data source configuration storage
- */
-public interface DBPDataSourceConfigurationStorage {
+import java.util.Map;
+import java.util.Set;
 
-    @NotNull
-    String getStorageId();
+public interface DBPObjectSettingsProvider {
 
-    @NotNull
-    default String getStorageName() {
-        return getStorageId();
-    }
-
-    boolean isValid();
-
-    boolean isDefault();
-
-    /**
-     * Checks if configuration storage is virtual
-     */
-    boolean isVirtual();
-
-    // Used for secure credentials save/load (it is a prt of credentials file name)
     @Nullable
-    String getStorageSubId();
+    Map<String, String> getObjectSettings(
+        @NotNull SMObjectType objectType,
+        @NotNull String objectId
+    );
+
+    void setObjectSettings(
+        @NotNull SMObjectType objectType,
+        @NotNull String objectId,
+        @NotNull Map<String, String> settings
+    ) throws DBException;
+
+    void clearObjectSettings(
+        @NotNull SMObjectType objectType,
+        @NotNull String objectId,
+        @NotNull Set<String> settings
+    ) throws DBException;
 
 }
