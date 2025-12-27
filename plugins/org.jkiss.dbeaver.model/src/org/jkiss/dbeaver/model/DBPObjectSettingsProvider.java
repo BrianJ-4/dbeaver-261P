@@ -24,14 +24,26 @@ import org.jkiss.dbeaver.model.security.SMObjectType;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Provides possibility to overwrite preferences for datasources in multi-user applications.
+ * Settings are always user-specific, not global.
+ * Implementation is provided thru adapters of {@link org.jkiss.dbeaver.model.app.DBPProject}.
+ */
 public interface DBPObjectSettingsProvider {
 
+    /**
+     * Returns all settings for the specified object.
+     * IF there are no settings overwritten on user level - returns null.
+     */
     @Nullable
     Map<String, String> getObjectSettings(
         @NotNull SMObjectType objectType,
         @NotNull String objectId
     );
 
+    /**
+     * Set user settings for the specified object.
+     */
     void setObjectSettings(
         @NotNull SMObjectType objectType,
         @NotNull String objectId,

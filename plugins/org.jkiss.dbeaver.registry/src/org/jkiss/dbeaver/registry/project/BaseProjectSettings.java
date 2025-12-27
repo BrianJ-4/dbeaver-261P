@@ -79,18 +79,13 @@ public abstract class BaseProjectSettings implements DBPObjectSettingsProvider {
         @NotNull String objectId,
         @NotNull Set<String> settings
     ) throws DBException {
-        deleteObjectSettingsCache(objectType, objectId, settings);
-
-        if (projectSettings != null) {
-            synchronized (this) {
-                // update local cache
-                Map<String, String> cacheSettings = projectSettings
-                    .computeIfAbsent(objectType, ot -> new LinkedHashMap<>())
-                    .computeIfAbsent(objectId, k -> new LinkedHashMap<>());
-                cacheSettings.keySet().removeAll(settings);
-            }
-            DataSourceNavigatorSettingsUtils.objectSettingUpdated(project, objectId, settings);
+        Map<String, String> settingMap = new LinkedHashMap<>(settings.size());
+        for (String id : settings) {
+            settingMap.put(id, null);
         }
+        saveProjectSettings(objectType, objectId, settingMap);
+
+        deleteObjectSettingsCache(objectType, objectId, settings);
     }
 
     public void updateObjectSettingsCache(
@@ -147,12 +142,6 @@ public abstract class BaseProjectSettings implements DBPObjectSettingsProvider {
         @NotNull SMObjectType objectType,
         @NotNull String objectId,
         @NotNull Map<String, String> settings
-    ) throws DBException;
-
-    protected abstract void deleteProjectSettings(
-        @NotNull SMObjectType objectType,
-        @NotNull String objectId,
-        @NotNull Set<String> settings
     ) throws DBException;
 
 
