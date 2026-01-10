@@ -14,26 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jkiss.dbeaver.model.ai.engine;
+package org.jkiss.dbeaver.model.ai;
 
 import org.jkiss.code.NotNull;
 import org.jkiss.code.Nullable;
-import org.jkiss.dbeaver.model.ai.AIUsage;
 
-/**
- * Subscriber which listens for response stream
- */
-public interface AIEngineResponseConsumer {
+import java.time.Duration;
 
-    void nextChunk(@NotNull AIEngineResponseChunk chunk);
-
-    void error(@NotNull Throwable throwable);
-
-    void completeBlock();
-
-    void usage(@Nullable AIUsage usage);
-
-    void systemPromptLength(int length);
-
-    void warning(@NotNull String message);
+public record AIMessageMeta(
+    @NotNull String engineId,
+    @NotNull String modelId,
+    @Nullable AIUsage usage,
+    @NotNull Duration timeSpent,
+    int systemPromptLength
+) {
 }
