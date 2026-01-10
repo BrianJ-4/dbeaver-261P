@@ -36,7 +36,7 @@ public class DuckDBConnectionPageAdvanced extends ConnectionPageAbstract {
     private Combo sqlDollarQuoteTagCombo;
 
     public DuckDBConnectionPageAdvanced() {
-        setTitle("DuckDB");
+        setTitle("Advanced");
     }
 
     @Override
