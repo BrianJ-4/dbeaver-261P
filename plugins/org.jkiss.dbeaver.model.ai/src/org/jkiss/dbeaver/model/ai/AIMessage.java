@@ -1,0 +1,211 @@
+/*
+ * DBeaver - Universal Database Manager
+ * Copyright (C) 2010-2026 DBeaver Corp and others
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.jkiss.dbeaver.model.ai;
+
+import org.jkiss.code.NotNull;
+import org.jkiss.code.Nullable;
+import org.jkiss.dbeaver.model.ai.engine.AIFunctionCall;
+import org.jkiss.utils.CommonUtils;
+
+import java.time.LocalDateTime;
+
+/**
+ * Represents a single AI message
+ */
+public class AIMessage {
+    @NotNull
+    private final AIMessageType role;
+    @NotNull
+    private final String content;
+    @Nullable
+    private final String displayMessage;
+    @Nullable
+    private final String customResultInfo;
+    @NotNull
+    private final LocalDateTime time;
+    @Nullable
+    private final AIFunctionCall functionCall;
+    @Nullable
+    private final AIFunctionResult functionResult;
+    @Nullable
+    private final AIMessageMeta meta;
+
+    public AIMessage(
+        @NotNull AIMessageType role,
+        @NotNull String content,
+        @Nullable String displayMessage,
+        @NotNull LocalDateTime time,
+        @Nullable AIMessageMeta meta,
+        @Nullable String functionCallID
+    ) {
+        this.role = role;
+        this.content = content;
+        this.displayMessage = displayMessage;
+        this.time = time;
+        this.meta = meta;
+        this.functionCall = null;
+        this.functionResult = null;
+        this.customResultInfo = functionCallID;
+    }
+    /**
+     * Creates AI message
+     */
+    public AIMessage(
+        @NotNull AIMessageType role,
+        @NotNull String content,
+        @Nullable String displayMessage,
+        @NotNull LocalDateTime time,
+        @Nullable AIMessageMeta meta
+    ) {
+        this.role = role;
+        this.content = content;
+        this.displayMessage = displayMessage;
+        this.time = time;
+        this.meta = meta;
+        this.functionCall = null;
+        this.functionResult = null;
+        this.customResultInfo = null;
+    }
+
+    /**
+     * Creates AI message
+     */
+    private AIMessage(
+        @NotNull AIFunctionCall functionCall,
+        @NotNull AIFunctionResult result,
+        @Nullable AIMessageMeta meta
+    ) {
+        this.meta = meta;
+        this.role = AIMessageType.FUNCTION;
+        this.content = CommonUtils.toString(result.getValue()) + " was completed";
+        this.time = LocalDateTime.now();
+        this.functionCall = functionCall;
+        this.functionResult = result;
+        this.displayMessage = CommonUtils.toString(result.getValue());
+        this.customResultInfo = null;
+    }
+
+    @NotNull
+    public static AIMessage systemMessage(@NotNull String message) {
+        return new AIMessage(AIMessageType.SYSTEM, message, null);
+    }
+
+    @NotNull
+    public static AIMessage userMessage(@NotNull String message) {
+        return new AIMessage(AIMessageType.USER, message, null);
+    }
+
+    @NotNull
+    public static AIMessage assistantMessage(@NotNull String message, @Nullable AIMessageMeta meta) {
+        return new AIMessage(AIMessageType.ASSISTANT, message, meta);
+    }
+
+    @NotNull
+    public static AIMessage functionCall(@NotNull AIFunctionCall functionCall, @NotNull AIFunctionResult result) {
+        return new AIMessage(functionCall, result, null);
+    }
+
+    @NotNull
+    public static AIMessage warningMessage(@NotNull String message) {
+        return new AIMessage(AIMessageType.WARNING, message, null);
+    }
+
+    @NotNull
+    public static AIMessage errorMessage(@NotNull Throwable throwable) {
+        return new AIMessage(
+            AIMessageType.ERROR,
+            CommonUtils.toString(CommonUtils.getAllExceptionMessages(throwable), "Unknown error"),
+            null
+        );
+    }
+
+    @NotNull
+    public static AIMessage userAutoMessage(@NotNull String prompt, @NotNull String uiMessage) {
+        return new AIMessage(AIMessageType.USER, prompt, uiMessage, LocalDateTime.now(), null);
+    }
+
+    public AIMessage(@NotNull AIMessageType role, @NotNull String content, AIMessageMeta meta) {
+        this(role, content, content, LocalDateTime.now(), meta);
+    }
+
+    public static AIMessage functionMessage(String id, String payload, AIMessageType type) {
+        return new AIMessage(
+            type,
+            payload,
+            null,
+            LocalDateTime.now(),
+            null,
+            id
+        );
+    }
+
+    @Override
+    public String toString() {
+        return "Message (" + role + "): " + content;
+    }
+
+    public boolean isAutoGenerated() {
+        return displayMessage != null && !CommonUtils.equalObjects(displayMessage, content);
+    }
+
+    public String getDisplayMessage() {
+        return displayMessage != null ? displayMessage : content;
+    }
+
+    public String getRawDisplayMessage() {
+        return displayMessage;
+    }
+
+    @NotNull
+    public AIMessageType getRole() {
+        return role;
+    }
+
+    @NotNull
+    public String getContent() {
+        return content;
+    }
+
+    @Nullable
+    public String getToolUseID() {
+        return customResultInfo;
+    }
+
+    @NotNull
+    public LocalDateTime getTime() {
+        return time;
+    }
+
+    @Nullable
+    public AIFunctionCall getFunctionCall() {
+        return functionCall;
+    }
+
+    @Nullable
+    public AIFunctionResult getFunctionResult() {
+        return functionResult;
+    }
+
+    @Nullable
+    public AIMessageMeta getMeta() {
+        return meta;
+    }
+
+    public AIMessage withContent(String newContent) {
+        return new AIMessage(role, newContent, displayMessage, time, meta);
+    }
+}
