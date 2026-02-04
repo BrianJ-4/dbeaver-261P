@@ -123,6 +123,7 @@ public class DBNUtilsTest extends DBeaverUnitTest {
         addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
         addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
 
+        //changed expected
         List<String> givenNames = List.of("s2", "s01", "s002", "s10", "s02");
         List<String> expectedNames = List.of("s01", "s2", "s002", "s02", "s10");
 
