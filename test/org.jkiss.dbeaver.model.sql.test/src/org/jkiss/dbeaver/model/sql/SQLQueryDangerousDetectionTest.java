@@ -82,4 +82,64 @@ public class SQLQueryDangerousDetectionTest extends DBeaverUnitTest {
         assertTrue(query.isDropDangerous());
     }
 
+
+    /* ---------------- Additional isDropDangerous Tests ---------------- */
+
+    @Test
+    public void dropStatementWithMixedCaseShouldBeDangerous() {
+        var query = new SQLQuery(null, "DrOp TaBlE users");
+        assertTrue(query.isDropDangerous());
+    }
+
+    @Test
+    public void dropTableIfExistsShouldBeDangerous() {
+        var query = new SQLQuery(null, "DROP TABLE IF EXISTS users");
+        assertTrue(query.isDropDangerous());
+    }
+
+    @Test
+    public void dropViewStatementShouldBeDangerous() {
+        var query = new SQLQuery(null, "DROP VIEW active_users");
+        assertTrue(query.isDropDangerous());
+    }
+
+    @Test
+    public void dropIndexStatementShouldBeDangerous() {
+        var query = new SQLQuery(null, "DROP INDEX user_index");
+        assertTrue(query.isDropDangerous());
+    }
+
+    @Test
+    public void dropKeywordInCommentShouldNotBeDangerous() {
+        var query = new SQLQuery(
+            null,
+            "-- DROP TABLE users\nSELECT * FROM users"
+        );
+        assertFalse(query.isDropDangerous());
+    }
+
+    @Test
+    public void dropKeywordInsideStringLiteralShouldNotBeDangerous() {
+        var query = new SQLQuery(
+            null,
+            "SELECT 'DROP TABLE users' AS message"
+        );
+        assertFalse(query.isDropDangerous());
+    }
+
+    @Test
+    public void emptyQueryShouldNotBeDangerous() {
+        var query = new SQLQuery(null, "   ");
+        assertFalse(query.isDropDangerous());
+    }
+
+    @Test
+    public void createTableStatementShouldNotBeDropDangerous() {
+        var query = new SQLQuery(
+            null,
+            "CREATE TABLE users (id INT)"
+        );
+        assertFalse(query.isDropDangerous());
+    }
+
 }
