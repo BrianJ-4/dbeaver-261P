@@ -26,61 +26,44 @@ class DBCExecutionContextTest {
     }
 
     // -------------------------------------------------
-    // 1. Successful connection
+    // 1. Full Successful Lifecycle Test
+    // Created → Connected → Active_Session → Connected
     // -------------------------------------------------
     @Test
-    void testConnectSuccess() throws Exception {
+    void testSuccessfulLifecycle() throws Exception {
         when(context.connect()).thenReturn(true);
-        when(context.isConnected()).thenReturn(true);
-
-        assertTrue(context.connect());
-        assertTrue(context.isConnected());
-    }
-
-    // -------------------------------------------------
-    // 2. Open session from connected state
-    // -------------------------------------------------
-    @Test
-    void testOpenSessionWhenConnected() throws Exception {
         when(context.isConnected()).thenReturn(true);
         when(context.openSession(any())).thenReturn(session);
 
+        // Connect
+        assertTrue(context.connect());
+        assertTrue(context.isConnected());
+
+        // Open session
         DBCSession opened = context.openSession(null);
-
         assertNotNull(opened);
-        verify(context).openSession(null);
-    }
 
-    // -------------------------------------------------
-    // 3. Session close returns to connected state
-    // -------------------------------------------------
-    @Test
-    void testCloseSession() throws Exception {
-        when(session.isClosed()).thenReturn(false);
-
+        // Close session
         session.close();
-
         verify(session).close();
     }
 
     // -------------------------------------------------
-    // 4. Health check failure transitions to Failed
+    // 2. Failure Detection and Automatic Recovery
+    // Connected → Failed → Reconnecting → Connected
     // -------------------------------------------------
     @Test
-    void testHealthCheckFailure() throws Exception {
-        doThrow(new DBException("Connection lost"))
+    void testFailureAndSuccessfulRecovery() throws Exception {
+
+        // Simulate failure
+        doThrow(new DBException("Lost connection"))
                 .when(context).checkContextAlive();
 
         assertThrows(DBException.class, () -> {
             context.checkContextAlive();
         });
-    }
 
-    // -------------------------------------------------
-    // 5. Retry logic from failed state
-    // -------------------------------------------------
-    @Test
-    void testRetryAfterFailure() throws Exception {
+        // Simulate recovery
         when(context.retry()).thenReturn(true);
         when(context.isConnected()).thenReturn(true);
 
@@ -89,59 +72,60 @@ class DBCExecutionContextTest {
     }
 
     // -------------------------------------------------
-    // 6. Reconnection failure
+    // 3. Failure with Retry Exhaustion
+    // Connected → Failed → Reconnecting → Failed
     // -------------------------------------------------
     @Test
-    void testReconnectFailure() throws Exception {
+    void testFailureWithRetryExhaustion() throws Exception {
+
+        doThrow(new DBException("Lost connection"))
+                .when(context).checkContextAlive();
+
+        assertThrows(DBException.class, () -> {
+            context.checkContextAlive();
+        });
+
         when(context.retry()).thenReturn(false);
 
         assertFalse(context.retry());
     }
 
     // -------------------------------------------------
-    // 7. Prevent session opening when disconnected
+    // 4. Invalid Operation Enforcement
+    // Failed → Failed (No session allowed)
     // -------------------------------------------------
     @Test
-    void testOpenSessionWhenDisconnected() throws Exception {
+    void testInvalidOperationWhenDisconnected() throws Exception {
+
         when(context.isConnected()).thenReturn(false);
 
         assertThrows(DBException.class, () -> {
             context.openSession(null);
         });
+
+        verify(context, never()).connect();
     }
 
     // -------------------------------------------------
-    // 8. Invalidate context
+    // 5. Manual Invalidation and Transaction Support
+    // Connected → Failed → Reconnecting → Connected
     // -------------------------------------------------
     @Test
-    void testInvalidateContext() throws Exception {
+    void testManualInvalidationAndTransactionAccess() throws Exception {
+
+        // Manual invalidation
         doNothing().when(context).invalidateContext();
-
         context.invalidateContext();
-
         verify(context).invalidateContext();
-    }
 
-    // -------------------------------------------------
-    // 9. Multiple retries exhaustion
-    // -------------------------------------------------
-    @Test
-    void testRetryExhaustion() throws Exception {
-        when(context.retry())
-                .thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(false);
+        // Retry recovery
+        when(context.retry()).thenReturn(true);
+        when(context.isConnected()).thenReturn(true);
 
-        assertFalse(context.retry());
-        assertFalse(context.retry());
-        assertFalse(context.retry());
-    }
+        assertTrue(context.retry());
+        assertTrue(context.isConnected());
 
-    // -------------------------------------------------
-    // 10. Transaction manager availability
-    // -------------------------------------------------
-    @Test
-    void testTransactionManagerExists() {
+        // Transaction manager availability
         DBCTransactionManager txManager = mock(DBCTransactionManager.class);
         when(context.getTransactionManager()).thenReturn(txManager);
 

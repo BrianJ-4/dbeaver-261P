@@ -76,6 +76,124 @@ public class DBNUtilsTest extends DBeaverUnitTest {
         assertCorrectSortingWithCase(false);
     }
 
+    /* ADDITIONAL TEST CASES */
+
+    @Test
+    public void P1_sortingDisabled_preservesOriginalOrder() {
+        // Partition P1: Sorting disabled
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, false);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("b", "a", "A", "C");
+        var result = DBNUtils.filterNavigableChildren(getNamedNodes(givenNames), true);
+
+        assertEquals(givenNames, Arrays.stream(result).map(DBNNode::getNodeDisplayName).toList());
+    }
+
+    @Test
+    public void P2_caseInsensitiveAlphabeticSort_ordersMixedCaseCorrectly() {
+        // Partition P2: Case-insensitive alphabetical sorting
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("b", "a", "A", "C");
+        List<String> expectedNames = List.of("a", "A", "b", "C");
+
+        assertCorrectSortingIgnoreCase(expectedNames, givenNames);
+    }
+
+    @Test
+    public void P3_alphanumericNoLeadingZeros_naturalSortOrdersByNumericValue() {
+        // Partition P3: Alphanumeric values with no leading zeros (natural sort)
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("s2", "s1", "s10", "s3");
+        List<String> expectedNames = List.of("s1", "s2", "s3", "s10");
+
+        assertCorrectSortingIgnoreCase(expectedNames, givenNames);
+    }
+
+    @Test
+    public void P4_alphanumericLeadingZeros_handlesZeroPaddedNumbersConsistently() {
+        // Partition P4: Alphanumeric values with leading zeros
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("s2", "s01", "s002", "s10", "s02");
+        List<String> expectedNames = List.of("s01", "s2", "s002", "s02", "s10");
+
+        assertCorrectSortingIgnoreCase(expectedNames, givenNames);
+    }
+
+    @Test
+    public void P5_longNames_sortsCorrectlyAndDoesNotFail() {
+        // Partition P5: Very long names (boundary length)
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of(
+            "s2123456789123456789",
+            "s1123456789123456789"
+        );
+        List<String> expectedNames = List.of(
+            "s1123456789123456789",
+            "s2123456789123456789"
+        );
+
+        assertCorrectSortingIgnoreCase(expectedNames, givenNames);
+    }
+
+    @Test
+    public void P6_duplicates_preservesAllValuesAndOrdersGroupCorrectly() {
+        // Partition P6: Duplicate names
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("b", "a", "a", "A", "C");
+        List<String> expectedNames = List.of("a", "a", "A", "b", "C");
+
+        assertCorrectSortingIgnoreCase(expectedNames, givenNames);
+    }
+
+    @Test
+    public void P7_emptyAndWhitespace_doesNotCrashAndPreservesAllElements() {
+        // Partition P7: Empty / whitespace-only names
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("b", "", " ", "a");
+        var result = DBNUtils.filterNavigableChildren(getNamedNodes(givenNames), true);
+
+        List<String> actual = Arrays.stream(result).map(DBNNode::getNodeDisplayName).toList();
+        assertEquals(givenNames.size(), actual.size());
+        assertEquals(givenNames.stream().sorted().toList(), actual.stream().sorted().toList());
+    }
+
+    @Test
+    public void P8_specialCharacters_doesNotCrashAndPreservesAllElements() {
+        // Partition P8: Special characters / punctuation in names
+        addProperty(ModelPreferences.NAVIGATOR_SORT_IGNORE_CASE, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_ALPHABETICALLY, true);
+        addProperty(ModelPreferences.NAVIGATOR_SORT_FOLDERS_FIRST, false);
+
+        List<String> givenNames = List.of("a_1", "a-1", "a.1", "a1");
+        var result = DBNUtils.filterNavigableChildren(getNamedNodes(givenNames), true);
+
+        List<String> actual = Arrays.stream(result).map(DBNNode::getNodeDisplayName).toList();
+        assertEquals(givenNames.size(), actual.size());
+        assertEquals(givenNames.stream().sorted().toList(), actual.stream().sorted().toList());
+    }
+
+
+    /* END OF ADDITIONAL TEST CASES */
+
     private void assertRemainUnsorted() {
         List<String> givenNames = List.of("b", "a", "A", "C");
         List<String> expectedNames = List.of("b", "a", "A", "C");
