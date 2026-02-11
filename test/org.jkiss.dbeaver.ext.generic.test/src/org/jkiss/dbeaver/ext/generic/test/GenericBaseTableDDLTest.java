@@ -326,6 +326,78 @@ public class GenericBaseTableDDLTest extends DBeaverUnitTest {
         Assert.assertEquals(tableDDL, expectedDDL);
     }
 
+    /* FSM TEST */
+
+    @Test
+    public void fsmCoverage_createTableWithColumnsPkAndComments_generatesExpectedDDL() throws Exception {
+        // S0: EMPTY_CONTEXT
+        TestCommandContext commandContext = new TestCommandContext(executionContext, false);
+
+        // eCreateTable: S0 -> S1 (TABLE_DRAFT_CREATED)
+        GenericTableBase table = objectMaker.createNewObject(
+            monitor,
+            commandContext,
+            genericSchema,
+            null,
+            Collections.emptyMap()
+        );
+
+        // eAddColumn (x2): S1 -> S2 (COLUMNS_ADDED)
+        DBEObjectMaker<GenericTableColumn, GenericTableBase> columnManager = getManagerForClass(GenericTableColumn.class);
+        GenericTableColumn col1 = columnManager.createNewObject(
+            monitor, commandContext, table, null, Collections.emptyMap()
+        );
+        col1.setName("Column1");              // make output deterministic
+        col1.setDescription("Test comment 1"); // prepares S4 contribution
+
+        GenericTableColumn col2 = columnManager.createNewObject(
+            monitor, commandContext, table, null, Collections.emptyMap()
+        );
+        col2.setName("Column2");               // make output deterministic
+        col2.setRequired(true);                // Column2 NOT NULL
+        col2.setDescription("Test comment 2"); // prepares S4 contribution
+
+        // eAddConstraint: S2 -> S3 (CONSTRAINTS_ADDED)
+        DBEObjectMaker<GenericUniqueKey, GenericTableBase> constraintManager = getManagerForClass(GenericUniqueKey.class);
+        GenericUniqueKey pk = constraintManager.createNewObject(
+            monitor, commandContext, table, null, Collections.emptyMap()
+        );
+        pk.setName("NEWTABLE_PK");
+        pk.setConstraintType(DBSEntityConstraintType.PRIMARY_KEY);
+        pk.setAttributeReferences(List.of(new GenericTableConstraintColumn(pk, col1, 1)));
+
+        // At this point, we have also applied comments: S3 -> S4 (COMMENTS_ADDED)
+
+        // eGenerateActions: S4 -> S5 (ACTIONS_READY)
+        List<DBEPersistAction> actions = DBExecUtils.getActionsListFromCommandContext(
+            monitor,
+            commandContext,
+            executionContext,
+            Collections.emptyMap(),
+            null
+        );
+
+        // eGenerateScript: S5 -> S6 (SCRIPT_GENERATED)
+        String script = SQLUtils.generateScript(
+            dataSource,
+            actions.toArray(new DBEPersistAction[0]),
+            false
+        );
+
+        // Assertions correspond to state contributions:
+        // - S2: columns exist
+        Assert.assertTrue(script.contains("\tColumn1 INTEGER"));
+        Assert.assertTrue(script.contains("\tColumn2 INTEGER NOT NULL"));
+        // - S3: PK constraint exists
+        Assert.assertTrue(script.contains("\tCONSTRAINT NEWTABLE_PK PRIMARY KEY (Column1)"));
+        // - S4: comments exist
+        Assert.assertTrue(script.contains("COMMENT ON COLUMN CATALOG_GENERIC.SCHEMA_GENERIC.NewTable.Column1 IS 'Test comment 1';"));
+        Assert.assertTrue(script.contains("COMMENT ON COLUMN CATALOG_GENERIC.SCHEMA_GENERIC.NewTable.Column2 IS 'Test comment 2';"));
+        Assert.assertTrue(script.startsWith("CREATE TABLE CATALOG_GENERIC.SCHEMA_GENERIC.NewTable ("));
+    }
+
+    /* END OF FSM TEST */
+
     private GenericTableColumn addColumn(
         GenericTableBase table,
         String columnName,
