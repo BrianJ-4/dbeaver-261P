@@ -396,6 +396,235 @@ public class GenericBaseTableDDLTest extends DBeaverUnitTest {
         Assert.assertTrue(script.startsWith("CREATE TABLE CATALOG_GENERIC.SCHEMA_GENERIC.NewTable ("));
     }
 
+    @Test
+    public void createTableWithTwoColumns_generatesCorrectDDL() throws Exception {
+        TestCommandContext commandContext = new TestCommandContext(executionContext, false);
+
+        GenericTableBase table = objectMaker.createNewObject(
+            monitor,
+            commandContext,
+            genericSchema,
+            null,
+            Collections.emptyMap()
+        );
+
+        DBEObjectMaker<GenericTableColumn, GenericTableBase> columnManager = getManagerForClass(GenericTableColumn.class);
+        columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+        columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+
+        List<DBEPersistAction> actions = DBExecUtils.getActionsListFromCommandContext(
+            monitor,
+            commandContext,
+            executionContext,
+            Collections.emptyMap(),
+            null
+        );
+
+        String script = SQLUtils.generateScript(dataSource, actions.toArray(new DBEPersistAction[0]), false);
+
+        String expectedDDL = "CREATE TABLE CATALOG_GENERIC.SCHEMA_GENERIC.NewTable (" + lineBreak +
+            "\tColumn1 INTEGER," + lineBreak +
+            "\tColumn2 INTEGER" + lineBreak +
+            ");" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, script);
+    }
+
+    @Test
+    public void createTableWithNullableConstraint_generatesNotNullDDL() throws Exception {
+        TestCommandContext commandContext = new TestCommandContext(executionContext, false);
+
+        GenericTableBase table = objectMaker.createNewObject(
+            monitor,
+            commandContext,
+            genericSchema,
+            null,
+            Collections.emptyMap()
+        );
+
+        DBEObjectMaker<GenericTableColumn, GenericTableBase> columnManager = getManagerForClass(GenericTableColumn.class);
+        columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+
+        DBSObject newColumn = columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+        if (newColumn instanceof GenericTableColumn) {
+            ((GenericTableColumn) newColumn).setRequired(true);
+        }
+
+        List<DBEPersistAction> actions = DBExecUtils.getActionsListFromCommandContext(
+            monitor,
+            commandContext,
+            executionContext,
+            Collections.emptyMap(),
+            null
+        );
+        String script = SQLUtils.generateScript(dataSource, actions.toArray(new DBEPersistAction[0]), false);
+
+        String expectedDDL = "CREATE TABLE CATALOG_GENERIC.SCHEMA_GENERIC.NewTable (" + lineBreak +
+            "\tColumn1 INTEGER," + lineBreak +
+            "\tColumn2 INTEGER NOT NULL" + lineBreak +
+            ");" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, script);
+    }
+
+    @Test
+    public void createTableWithPrimaryKey_generatesConstraintDDL() throws Exception {
+        TestCommandContext commandContext = new TestCommandContext(executionContext, false);
+
+        GenericTableBase table = objectMaker.createNewObject(
+            monitor,
+            commandContext,
+            genericSchema,
+            null,
+            Collections.emptyMap()
+        );
+
+        DBEObjectMaker<GenericTableColumn, GenericTableBase> columnManager = getManagerForClass(GenericTableColumn.class);
+        GenericTableColumn column1 = columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+        columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+
+        DBEObjectMaker<GenericUniqueKey, GenericTableBase> constraintManager = getManagerForClass(GenericUniqueKey.class);
+        GenericUniqueKey pk = constraintManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+        pk.setName("NEWTABLE_PK");
+        pk.setConstraintType(DBSEntityConstraintType.PRIMARY_KEY);
+        pk.setAttributeReferences(List.of(new GenericTableConstraintColumn(pk, column1, 1)));
+
+        List<DBEPersistAction> actions = DBExecUtils.getActionsListFromCommandContext(
+            monitor,
+            commandContext,
+            executionContext,
+            Collections.emptyMap(),
+            null
+        );
+        String script = SQLUtils.generateScript(dataSource, actions.toArray(new DBEPersistAction[0]), false);
+
+        String expectedDDL = "CREATE TABLE CATALOG_GENERIC.SCHEMA_GENERIC.NewTable (" + lineBreak +
+            "\tColumn1 INTEGER," + lineBreak +
+            "\tColumn2 INTEGER," + lineBreak +
+            "\tCONSTRAINT NEWTABLE_PK PRIMARY KEY (Column1)" + lineBreak +
+            ");" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, script);
+    }
+
+    @Test
+    public void createTableWithComments_generatesCommentStatements() throws Exception {
+        TestCommandContext commandContext = new TestCommandContext(executionContext, false);
+
+        GenericTableBase table = objectMaker.createNewObject(
+            monitor,
+            commandContext,
+            genericSchema,
+            null,
+            Collections.emptyMap()
+        );
+
+        DBEObjectMaker<GenericTableColumn, GenericTableBase> columnManager = getManagerForClass(GenericTableColumn.class);
+
+        GenericTableColumn col1 = columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+        col1.setDescription("Test comment 1");
+
+        GenericTableColumn col2 = columnManager.createNewObject(monitor, commandContext, table, null, Collections.emptyMap());
+        col2.setDescription("Test comment 2");
+
+        List<DBEPersistAction> actions = DBExecUtils.getActionsListFromCommandContext(
+            monitor,
+            commandContext,
+            executionContext,
+            Collections.emptyMap(),
+            null
+        );
+        String script = SQLUtils.generateScript(dataSource, actions.toArray(new DBEPersistAction[0]), false);
+
+        String expectedDDL = "CREATE TABLE CATALOG_GENERIC.SCHEMA_GENERIC.NewTable (" + lineBreak +
+            "\tColumn1 INTEGER," + lineBreak +
+            "\tColumn2 INTEGER" + lineBreak +
+            ");" + lineBreak +
+            "COMMENT ON COLUMN CATALOG_GENERIC.SCHEMA_GENERIC.NewTable.Column1 IS 'Test comment 1';" + lineBreak +
+            "COMMENT ON COLUMN CATALOG_GENERIC.SCHEMA_GENERIC.NewTable.Column2 IS 'Test comment 2';" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, script);
+    }
+
+    @Test
+    public void dropTable_generatesCorrectDropDDL() throws Exception {
+        TestCommandContext commandContext = new TestCommandContext(executionContext, false);
+
+        objectMaker.deleteObject(commandContext, genericTable, Collections.emptyMap());
+
+        List<DBEPersistAction> actions = DBExecUtils.getActionsListFromCommandContext(
+            monitor,
+            commandContext,
+            executionContext,
+            Collections.emptyMap(),
+            null
+        );
+        String script = SQLUtils.generateScript(dataSource, actions.toArray(new DBEPersistAction[0]), false);
+
+        String expectedDDL = "DROP TABLE CATALOG_GENERIC.TABLE_GENERIC;" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, script);
+    }
+
+    @Test
+    public void persistedTableDefinition_generatesFullCreateDDL() throws Exception {
+        // This mirrors your existing persisted-table DDL test, but with the “report-friendly” name.
+        GenericTableColumn c1 = addColumn(genericTable, "COLUMN1", "VARCHAR", 1);
+        c1.setMaxLength(100);
+
+        GenericTableColumn c2 = addColumn(genericTable, "COLUMN2", "NUMBER", 2);
+        c2.setPrecision(38);
+
+        GenericTableColumn c3 = addColumn(genericTable, "COLUMN3", "CHAR", 3);
+        c3.setMaxLength(13);
+
+        String ddl = genericTable.getObjectDefinitionText(monitor, Collections.emptyMap());
+
+        String expectedDDL = "-- Drop table" + lineBreak +
+            lineBreak +
+            "-- DROP TABLE CATALOG_GENERIC.TABLE_GENERIC;" + lineBreak +
+            lineBreak +
+            "CREATE TABLE CATALOG_GENERIC.TABLE_GENERIC (" + lineBreak +
+            "\tCOLUMN1 VARCHAR(100)," + lineBreak +
+            "\tCOLUMN2 NUMBER," + lineBreak +
+            "\tCOLUMN3 CHAR(13)" + lineBreak +
+            ");" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, ddl);
+    }
+
+    @Test
+    public void persistedTableWithRequiredColumns_generatesNotNullDDL() throws Exception {
+        // Creates a new persisted-style table and verifies NOT NULL generation for required columns.
+        GenericTable requiredTable = new GenericTable(
+            genericSchema,
+            "TABLE_REQUIRED",
+            "CATALOG_GENERIC",
+            "SCHEMA_GENERIC"
+        );
+
+        GenericTableColumn c1 = addColumn(requiredTable, "COLUMN1", "DATE", 1);
+        c1.setRequired(true);
+        GenericTableColumn c2 = addColumn(requiredTable, "COLUMN2", "BOOLEAN", 2);
+        c2.setRequired(true);
+        GenericTableColumn c3 = addColumn(requiredTable, "COLUMN3", "BLOB", 3);
+        c3.setRequired(true);
+
+        String ddl = requiredTable.getObjectDefinitionText(monitor, Collections.emptyMap());
+
+        String expectedDDL = "-- Drop table" + lineBreak +
+            lineBreak +
+            "-- DROP TABLE CATALOG_GENERIC.TABLE_REQUIRED;" + lineBreak +
+            lineBreak +
+            "CREATE TABLE CATALOG_GENERIC.TABLE_REQUIRED (" + lineBreak +
+            "\tCOLUMN1 DATE NOT NULL," + lineBreak +
+            "\tCOLUMN2 BOOLEAN NOT NULL," + lineBreak +
+            "\tCOLUMN3 BLOB NOT NULL" + lineBreak +
+            ");" + lineBreak;
+
+        Assert.assertEquals(expectedDDL, ddl);
+    }
+
     /* END OF FSM TEST */
 
     private GenericTableColumn addColumn(
