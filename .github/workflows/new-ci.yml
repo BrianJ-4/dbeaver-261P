@@ -1,0 +1,45 @@
+name: "New CI"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Clone dbeaver-common
+        run: git clone https://github.com/dbeaver/dbeaver-common.git
+
+      - name: Build dbeaver-common
+        run: |
+          cd dbeaver-common
+          mvn -B clean install -DskipTests
+
+      - name: Clone dbeaver-jdbc-libsql
+        run: git clone https://github.com/dbeaver/dbeaver-jdbc-libsql.git
+
+      - name: Build dbeaver-jdbc-libsql
+        run: |
+          cd dbeaver-jdbc-libsql
+          mvn -B clean install -DskipTests
+
+      - name: Build main project
+        run: mvn -B clean install
+
+      - name: Run Tests
+        run: |
+          cd test
+          mvn clean verify
