@@ -1,0 +1,60 @@
+name: "New CI"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # Create parent directory
+      - name: Create workspace structure
+        run: mkdir workspace
+
+      # Clone all three repos inside same parent folder
+      - name: Clone dbeaver-common
+        run: |
+          cd workspace
+          git clone https://github.com/dbeaver/dbeaver-common.git
+
+      - name: Clone dbeaver-jdbc-libsql
+        run: |
+          cd workspace
+          git clone https://github.com/dbeaver/dbeaver-jdbc-libsql.git
+
+      - name: Clone main repo
+        run: |
+          cd workspace
+          git clone https://github.com/BrianJ-4/dbeaver-261P.git dbeaver
+
+      # Build in order
+      - name: Build dbeaver-common
+        run: |
+          cd workspace/dbeaver-common
+          mvn clean install -DskipTests
+
+      - name: Build dbeaver-jdbc-libsql
+        run: |
+          cd workspace/dbeaver-jdbc-libsql
+          mvn clean install -DskipTests
+
+      - name: Build main project
+        run: |
+          cd workspace/dbeaver
+          mvn clean install
+
+      # Run tests
+      - name: Run Tests
+        run: |
+          cd workspace/dbeaver/test
+          mvn clean verify
