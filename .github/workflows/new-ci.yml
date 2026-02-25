@@ -41,17 +41,17 @@ jobs:
       - name: Build dbeaver-common
         run: |
           cd workspace/dbeaver-common
-          maven clean install -DskipTests
+          mvn clean install -DskipTests
 
       - name: Build dbeaver-jdbc-libsql
         run: |
           cd workspace/dbeaver-jdbc-libsql
-          maven clean install -DskipTests
+          mvn clean install -DskipTests
 
       - name: Build main project
         run: |
           cd workspace/dbeaver
-          maven clean install
+          mvn clean install
 
       # Run tests
       - name: Run Tests
