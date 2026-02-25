@@ -2,13 +2,16 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.jkiss.dbeaver</groupId>
         <artifactId>dbeaver</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
+
     <artifactId>tests</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -34,6 +37,27 @@
 
     <build>
         <plugins>
+
+            <!-- JaCoCo: only attach the agent here (report is generated at repo root) -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Tycho Surefire reads this property -->
+                            <propertyName>tycho.testArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Tycho Surefire Test Runner -->
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
@@ -41,21 +65,32 @@
                 <configuration>
                     <useUIHarness>false</useUIHarness>
                     <useUIThread>false</useUIThread>
+
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+
                     <application>org.jkiss.dbeaver.headless.application</application>
                     <product>org.jkiss.dbeaver.headless.product</product>
                     <testRuntime>default</testRuntime>
-                    <!-- Auto activate headless bundle to instantiate test application -->
+
+                    <!-- Auto activate headless bundle -->
                     <bundleStartLevel>
-                        <bundle><id>org.jkiss.dbeaver.headless</id><level>4</level><autoStart>true</autoStart></bundle>
+                        <bundle>
+                            <id>org.jkiss.dbeaver.headless</id>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                     </bundleStartLevel>
-<!--                    <argLine>-agentlib:jdwp=transport=dt_socket,server=n,address=localhost:15001,suspend=y</argLine>-->
+
+                    <!-- Inject JaCoCo agent into the Tycho test JVM -->
+                    <argLine>${tycho.testArgLine}</argLine>
+
+                    
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
-
 
 </project>

@@ -2,6 +2,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -35,6 +36,7 @@
     <build>
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <testSourceDirectory>${project.basedir}/tests</testSourceDirectory>
+
         <plugins>
             <!-- Tycho build -->
             <plugin>
@@ -115,18 +117,72 @@
             </plugin>
 
         </plugins>
-
     </build>
 
     <profiles>
+
         <!-- desktop build: includes UI components and products -->
         <profile>
             <id>desktop</id>
-            <activation><property><name>!headless-platform</name></property></activation>
+            <activation>
+                <property>
+                    <name>!headless-platform</name>
+                </property>
+            </activation>
             <modules>
                 <!-- Tests -->
                 <module>test</module>
             </modules>
+        </profile>
+
+        <!-- Coverage report (JaCoCo): merge per-test-module exec files + generate report -->
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.8.12</version>
+                        <executions>
+
+                            <!-- Merge all jacoco.exec files produced by the test modules -->
+                            <execution>
+                                <id>merge-jacoco</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>merge</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>${project.build.directory}/jacoco-merged.exec</destFile>
+                                    <fileSets>
+                                        <fileSet>
+                                            <directory>${project.basedir}/test</directory>
+                                            <includes>
+                                                <include>**/target/jacoco.exec</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                </configuration>
+                            </execution>
+
+                            <!-- Generate HTML report from the merged exec file -->
+                            <execution>
+                                <id>report-from-merged</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+                                    <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+                                </configuration>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
     </profiles>
