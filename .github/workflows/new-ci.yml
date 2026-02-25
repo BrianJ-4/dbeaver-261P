@@ -11,35 +11,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main repository
-        uses: actions/checkout@v4
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Clone dbeaver-common
-        run: git clone https://github.com/dbeaver/dbeaver-common.git
+      # Create parent directory
+      - name: Create workspace structure
+        run: mkdir workspace
 
-      - name: Build dbeaver-common
+      # Clone all three repos inside same parent folder
+      - name: Clone dbeaver-common
         run: |
-          cd dbeaver-common
-          mvn -B clean install -DskipTests
+          cd workspace
+          git clone https://github.com/dbeaver/dbeaver-common.git
 
       - name: Clone dbeaver-jdbc-libsql
-        run: git clone https://github.com/dbeaver/dbeaver-jdbc-libsql.git
+        run: |
+          cd workspace
+          git clone https://github.com/dbeaver/dbeaver-jdbc-libsql.git
+
+      - name: Clone main repo
+        run: |
+          cd workspace
+          git clone https://github.com/BrianJ-4/dbeaver-261P.git dbeaver
+
+      # Build in order
+      - name: Build dbeaver-common
+        run: |
+          cd workspace/dbeaver-common
+          maven clean install -DskipTests
 
       - name: Build dbeaver-jdbc-libsql
         run: |
-          cd dbeaver-jdbc-libsql
-          mvn -B clean install -DskipTests
+          cd workspace/dbeaver-jdbc-libsql
+          maven clean install -DskipTests
 
       - name: Build main project
-        run: mvn -B clean install
+        run: |
+          cd workspace/dbeaver
+          maven clean install
 
+      # Run tests
       - name: Run Tests
         run: |
-          cd test
+          cd workspace/dbeaver/test
           mvn clean verify
