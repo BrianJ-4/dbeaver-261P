@@ -283,4 +283,37 @@ public class DBUtilsTest extends DBeaverUnitTest {
         Assert.assertNotEquals(dbsObject, mockEntity);
     }
 
+    @Test
+    public void testWithManualStub() {
+        // Instantiate manual stub
+        TestStubObject stub = new TestStubObject();
+
+        // Use DBUtils method that processes a DBSObject
+        // Testing getObjectFullName which internally calls getName() on stub
+        String fullPathName = DBUtils.getObjectFullName(stub, DBPEvaluationContext.UI);
+
+        // Assert result matches value returned by stubbed method
+        Assert.assertEquals("Stubbed-Table", fullPathName);
+    }
+
+    private static class TestStubObject implements DBSObject {
+        @NotNull
+        @Override
+        public String getName() {
+            // Stubbed method return value
+            return "Stubbed-Table";
+        }
+
+        @Override
+        public String getDescription() { return "Stub description"; }
+
+        @Override
+        public DBSObject getParentObject() { return null; }
+
+        @Override
+        public DBPDataSource getDataSource() { return null; }
+
+        @Override
+        public boolean isPersisted() { return true; }
+    }
 }
