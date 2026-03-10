@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+
 public class DBExecUtilsRecoverFSMTest extends DBeaverUnitTest {
     // Create DataSource mock
     private DBPDataSource makeDataSource(boolean recoverEnabled, int retryCount) {
